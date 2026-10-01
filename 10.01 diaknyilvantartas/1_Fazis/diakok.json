@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1,
+        "nev": "Bankó Béla",
+        "email": "BB@almahegy.org",
+        "osztaly_id" : 1
+    }
+    {
+        "id": 2,
+        "nev": "Szamár Szicília",
+        "email": "SzaSzi@ööööö.almáspite",
+        "osztaly_id" : 1
+    }
+    {
+        "id": 3,
+        "nev": "Torkos Tamás",
+        "email": "TorTa@dobos.hu",
+        "osztaly_id" : 1
+    }
+]
