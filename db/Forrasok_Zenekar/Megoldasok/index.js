@@ -3,6 +3,9 @@ const app = express();
 const mysql = require("mysql2");
 require("dotenv").config();
 
+
+app.use(express.json())
+
 const db = mysql.createConnection({
     host : process.env.DB_HOST,
     user : process.env.DB_USER,
@@ -11,19 +14,22 @@ const db = mysql.createConnection({
     database : process.env.DB_DATABASE
 })
 
-app.listen(3000, () => {
-    console.log("Server is running on port http://localhost:3000/");
-  });
 
-app.get("/api/zenekarok",(req,res ) =>{
-    db.query(`SELECT * FROM zenekarok`),(err,result) => (res.json());
+app.get("/api/zenekarok", (req,res ) =>{
+    db.query(`SELECT * FROM zenekarok`, (err,result) => {
+        if(err) throw err;
+        res.send(result)
+    });
 })
 
 app.get("/api/stilusok",(req,res ) =>{
-    db.query(`SELECT stilus_neve FROM stilusok`),(err,result) => (res.json());
+    db.query(`SELECT stilus_neve FROM stilusok`,(err,result) => {
+        if(err) throw err;
+        res.send(result)
+    });
 })
 
-app.post("/api/zenekarok",(req,res)=>{
+app.post("/api/ujzenekarok",(req,res)=>{
     db.query(`INSERT INTO zenekarok (id, nev, stilus_id, orszag, varos, aktiv_evek, tagok, legsikeresebb_album, kep_url) VALUES(?,?,?, ?, ?, ?, ?, ?, ?, ?, ?)`)[req.body.nev, req.body.stilus_id, req.body.orszag, req.body.varos, req.body.aktiv_evek, req.body.tagok, req.body.legsikeresebb_album, req.body.kep_url], (err, result) => {
         if(err)
         {
@@ -34,3 +40,7 @@ app.post("/api/zenekarok",(req,res)=>{
         res.status(201).send("Sikeres feltöltés");
     }
 })
+
+app.listen(3000, () => {
+    console.log("Server is running on port http://localhost:3000/api/zenekarok");
+  });
