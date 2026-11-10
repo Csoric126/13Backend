@@ -93,21 +93,112 @@ app.get("/mufajok/statisztika", (req, res) => {
     });
 });
 
-app.post("/mufajok/", async (req,res) =>{
+app.post("/mufajok/ujmufaj", async (req,res) =>{
     try {
-        const {id, nev} = req.body;
+        const {nev} = req.body;
 
-        if(!id || !nev){
-            return res.status(400)({error : "Az id és a név kitöltése kötelező"});
+        if(!nev){
+            return res.status(400).json({error : "A név kitöltése kötelező"});
         }
 
-        const query = "INSERT INTO mufajok (id, name) VALUES (?,?)";
-        const [results] = await conn.query(query ["99", "Akármiamitakarsz"])
-        res.status(201)
+        const sql = "INSERT INTO mufajok (nev) VALUES (?)";
+        const [results] = await conn.promise().query(sql, [nev])
+        res.status(201).json({message : "Műfaj sikeresen hozzáadva", nev : results.nev})
     } catch (error) {
-        
+        console.error("Hiba a beszúrás során", error)
+        res.status(500).json({error: "Adatbázis hiba történt a beszúráskor"})
     }
 })
+
+app.post("/konyvek/ujkonyv", async (req,res) =>{
+    try {
+        const {mufaj_id, cim, kiadasi_ev, oldalszam, kolcsonozheto} = req.body;
+
+        if(!mufaj_id || !cim || !kiadasi_ev || !oldalszam || !kolcsonozheto){
+            return res.status(400).json({error : "Az mufaj id, a cím, a kiadási év, az oldalszám és a kölcsönözhetősége kitöltése kötelező"});
+        }
+
+        const sql = "INSERT INTO konyvek (mufaj_id, cim, kiadasi_ev, oldalszam, kolcsonozheto) VALUES (?,?,?,?,?)";
+        const [results] = await conn.promise().query(sql, [mufaj_id, cim, kiadasi_ev, oldalszam, kolcsonozheto])
+        res.status(201).json({message : "Könyv sikeresen hozzáadva", cim: results.cim})
+    } catch (error) {
+        console.error("Hiba a beszúrás során", error)
+        res.status(500).json({error: "Adatbázis hiba történt a beszúráskor"})
+    }
+})
+app.patch('/mufajok/mufajjavitas', async (req, res) => {
+    try {
+        const { id, nev} = req.body;
+
+        if (!nev || !id) {
+            return res.status(400).json({ error: 'A név és az id mező kitöltése kötelező a módosításhoz.' });
+        }
+
+        const sql = "UPDATE mufajok SET nev = ? WHERE id = ?";
+        const [result] = await conn.promise().query(sql, [nev, id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'A műfaj nem található.' });
+        }
+        res.json({ message: "Műfaj sikeresen módosítva", id });
+    } catch (error) {
+        console.error("Hiba a módosítás során: ", error);
+        res.status(500).json({ error: 'Adatbázis hiba történt a módosításkor.' });
+    }
+});
+
+app.patch('/konyvek/konyvjavitas', async (req, res) => {
+    try {
+        const { id, cim} = req.body;
+
+        if (!cim || !id) {
+            return res.status(400).json({ error: 'A cím és az id mező kitöltése kötelező a módosításhoz.' });
+        }
+
+        const sql = "UPDATE konyvek SET cim = ? WHERE id = ?";
+        const [result] = await conn.promise().query(sql, [cim, id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'A könyv nem található.' });
+        }
+        res.json({ message: "Könyv sikeresen módosítva", id });
+    } catch (error) {
+        console.error("Hiba a módosítás során: ", error);
+        res.status(500).json({ error: 'Adatbázis hiba történt a módosításkor.' });
+    }
+});
+
+app.delete('/mufajok/mufajtorles', async (req, res) => {
+    try {
+        const { id} = req.body;
+        const sql = "DELETE FROM mufajok WHERE id = ? ";
+        const [result] = await conn.promise().query(sql, [id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'A Műfaj nem található.' });
+        }
+        res.json({ message: "Műfaj sikeresen törölve", nev });
+    } catch (error) {
+        console.error("Hiba a módosítás során: ", error);
+        res.status(500).json({ error: 'Adatbázis hiba történt a módosításkor.' });
+    }
+});
+
+app.delete('/konyvek/konyvtorles', async (req, res) => {
+    try {
+        const { id, cim} = req.body;
+        const sql = "DELETE FROM konyvek WHERE id = ? ";
+        const [result] = await conn.promise().query(sql, [id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'A Könyv nem található.' });
+        }
+        res.json({ message: "Könyv sikeresen törölve", cim });
+    } catch (error) {
+        console.error("Hiba a módosítás során: ", error);
+        res.status(500).json({ error: 'Adatbázis hiba történt a módosításkor.' });
+    }
+});
 
 
 //Done
